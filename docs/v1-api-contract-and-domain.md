@@ -7,8 +7,11 @@ Frozen before implementation. This is the contract we plan to build against.
 ```text
 USER
 THEATER_ADMIN
-SUPERADMIN
+ADMIN
+SUPER_ADMIN
 ```
+
+Fine-grained permission names (`SHOW_CREATE`, etc.) derived from these roles: [v1-authorities.md](v1-authorities.md).
 
 ## Domain entities
 
@@ -148,7 +151,7 @@ GET /api/v1/movies/now-showing
 GET /api/v1/movies/upcoming
 ```
 
-## SUPERADMIN
+## ADMIN
 
 ### Create movie
 
@@ -258,7 +261,7 @@ Query:
 ?date=2026-08-20
 ```
 
-## SUPERADMIN
+## ADMIN
 
 ### Create theatre
 
@@ -626,7 +629,7 @@ POST /api/v1/payments/{paymentId}/refund
 Authorization:
 
 ```text
-SUPERADMIN
+ADMIN
 ```
 
 or potentially an internal / admin payment service.
@@ -712,7 +715,7 @@ averageOccupancy
 
 ---
 
-# 13. SUPERADMIN Dashboard
+# 13. ADMIN Dashboard
 
 ### Platform statistics
 
@@ -774,7 +777,8 @@ Enums:
 Role:
 USER
 THEATER_ADMIN
-SUPERADMIN
+ADMIN
+SUPER_ADMIN
 
 UserStatus:
 ACTIVE

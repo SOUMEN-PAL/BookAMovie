@@ -8,8 +8,8 @@ alwaysApply: true
 Maven layout is documented in `docs/project-structure.md`. Follow it when adding code or modules.
 
 - `app` — `@SpringBootApplication`, properties, Flyway, Actuator. No feature controllers or entities.
-- `shared` — Lombok, Validation, Web MVC. HTTP envelope and prefixes: `api/` (`AppApi`, `WebApi`, `ApiPaths`), later `exception/` (`GlobalExceptionHandler`, `ResourceNotFoundException`), `response/` (`ApiResponse`, `ErrorResponse`), `pagination/` (`PageResponse`), `validation/`. Do not implement those extra classes until a feature needs them. No feature controllers, entities, Security, Redis, or JPA infrastructure.
-- `core` — depends on `shared`; Data JPA. Infrastructure only: `persistence/` (`BaseEntity`, `AuditableEntity`, `JpaConfig`), later `cache/RedisConfig`, `messaging/KafkaConfig` only if we use Kafka, and `config/`. No Security, controllers, or feature entities. Redis/Kafka starters go on `core` when those packages are added — not on a feature.
+- `shared` — Lombok, Validation, Web MVC. HTTP envelope and prefixes: `api/` (`AppApi`, `WebApi`, `ApiPaths`), later `exception/` (`GlobalExceptionHandler`, `ResourceNotFoundException`), `response/` (`ApiResponse`, `ErrorResponse`), `pagination/` (`PageResponse`), `validation/`. Do not implement those extra classes until a feature needs them. No feature controllers, entities, Spring Security, Redis, or JPA infrastructure.
+- `core` — depends on `shared`; Data JPA. Infrastructure: `persistence/` (`BaseEntity`, `AuditableEntity`, `JpaConfig`), later `cache/RedisConfig`, `messaging/KafkaConfig` only if we use Kafka, and `config/`. Domain security types live in `security/` (`Role`, `Permission`, `RolePermissions`) — no `GrantedAuthority`, no Spring Security dependency. No controllers or feature entities. Redis/Kafka starters go on `core` when those packages are added — not on a feature.
 
 - `features/<name>` — one jar per feature: `auth`, `user`, `movie`, `theatre`, `show`, `booking`, `payment`, `review`.
 - Each feature depends on `core` only. Features do not depend on each other.

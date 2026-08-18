@@ -1,6 +1,6 @@
 # BookMyMovie
 
-BookMyMovie is a movie-ticket booking backend: browse movies and theatres, pick seats for a show, lock and pay, then manage bookings and reviews. Clients are split into a **mobile/user API** (`/api/v1/app`) and a **theatre-admin / superadmin API** (`/api/v1/web`).
+BookMyMovie is a movie-ticket booking backend: browse movies and theatres, pick seats for a show, lock and pay, then manage bookings and reviews. Clients are split into a **mobile/user API** (`/api/v1/app`) and a **theatre-admin / admin / super-admin API** (`/api/v1/web`).
 
 This README follows the current Maven POMs and Spring Boot BOM. Architecture and the frozen v1 API live under [`docs/`](docs/). If a doc disagrees with the version tables below, the POMs are the source of truth.
 
@@ -26,7 +26,7 @@ The icon row is a quick overview (Redis, Kafka, Docker, and AWS are **planned**)
 
 ## What we are building
 
-Roles: `USER`, `THEATER_ADMIN`, `SUPERADMIN`.
+Roles: `USER`, `THEATER_ADMIN`, `ADMIN`, `SUPER_ADMIN`.
 
 Domain: User, Movie, Review, Theatre, Screen, Seat, Show, Booking, BookingSeat, Payment.
 
@@ -144,7 +144,7 @@ Managed by `spring-boot-starter-parent` **4.1.0** unless noted. Resolved from th
 | Client | Prefix | Annotation |
 | --- | --- | --- |
 | USER / mobile | `/api/v1/app` | `@AppApi` |
-| THEATER_ADMIN / SUPERADMIN | `/api/v1/web` | `@WebApi` |
+| THEATER_ADMIN / ADMIN / SUPER_ADMIN | `/api/v1/web` | `@WebApi` |
 
 Defined in `org.devbot.bookmymovie.shared.api`. Put resource paths on methods (`@GetMapping("/movies")`), not a second type-level `@RequestMapping`.
 
@@ -173,3 +173,4 @@ Defined in `org.devbot.bookmymovie.shared.api`. Put resource paths on methods (`
 | --- | --- |
 | [docs/project-structure.md](docs/project-structure.md) | Modules, packages, what belongs in `shared` / `core` |
 | [docs/v1-api-contract-and-domain.md](docs/v1-api-contract-and-domain.md) | Frozen v1 APIs, entities, DTOs, phases |
+| [docs/v1-authorities.md](docs/v1-authorities.md) | Role → `SHOW_CREATE`-style authorities |

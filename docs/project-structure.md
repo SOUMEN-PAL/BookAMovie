@@ -76,6 +76,10 @@ org.devbot.bookmymovie.core/
 │   ├── BaseEntity
 │   ├── AuditableEntity
 │   └── JpaConfig
+├── security/
+│   ├── Role
+│   ├── Permission
+│   └── RolePermissions      # no GrantedAuthority
 ├── cache/
 │   └── RedisConfig          # when we introduce Redis
 ├── messaging/
@@ -84,11 +88,12 @@ org.devbot.bookmymovie.core/
 ```
 
 - **persistence** — mapped superclasses and JPA setup every feature entity can extend. Feature `@Entity` classes still live in `features/<name>/data`.
+- **security** — domain `Role` / `Permission` and the role→permission map. Spring Security types (`GrantedAuthority`, `SecurityFilterChain`) stay in `features/auth`.
 - **cache** — Redis connection/template config used by more than one feature. Seat-lock *logic* stays in `booking`.
 - **messaging** — Kafka producer/consumer factory only if the project uses Kafka. Do not add the starter “just in case”.
-- **config** — clocks, object mappers, shared `@Configuration` that is not HTTP-API or security.
+- **config** — clocks, object mappers, shared `@Configuration` that is not HTTP-API.
 
-Do **not** put in `core`: `@RestController`, feature services, `SecurityFilterChain`, Flyway migrations, or `application.properties` (those stay in `app` / features).
+Do **not** put in `core`: `@RestController`, feature services, `GrantedAuthority`, `SecurityFilterChain`, Flyway migrations, or `application.properties` (those stay in `app` / features).
 
 `core` package root: `org.devbot.bookmymovie.core`.
 
@@ -109,7 +114,7 @@ features/<name>/src/main/java/org/devbot/bookmymovie/<name>/
 | Client | Prefix | Annotation |
 |--------|--------|------------|
 | USER / mobile | `/api/v1/app` | `@AppApi` |
-| THEATER_ADMIN / SUPERADMIN | `/api/v1/web` | `@WebApi` |
+| THEATER_ADMIN / ADMIN / SUPER_ADMIN | `/api/v1/web` | `@WebApi` |
 
 Defined in `org.devbot.bookmymovie.shared.api`. Put resource paths on **methods**, not a second type-level `@RequestMapping`.
 
