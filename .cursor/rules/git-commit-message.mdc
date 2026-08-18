@@ -1,0 +1,45 @@
+---
+description: Commit messages use (type) summary; short for small diffs, numbered body for large ones
+alwaysApply: true
+---
+
+# Git commit messages
+
+Personal project — no ticket prefix.
+
+## Subject format
+
+```text
+(feat) Short summary of the change
+```
+
+- **Type** in parentheses (lowercase): `feat`, `fix`, `debug`, `docs`, `perf`, `refactor`, `chore`.
+- **Summary**: concise phrase after the type. Focus on why, not a file dump.
+
+## Small change
+
+One subject line only, no body:
+
+```text
+(fix) Route movie list through @AppApi
+```
+
+## Large change
+
+Same subject, then a blank line and a numbered list of concrete points:
+
+```text
+(feat) Split the backend into feature modules
+
+1. Pull Spring Boot into app and add shared/core
+2. Add one Maven module per feature
+3. Document layout and Cursor layer rules
+```
+
+## When committing
+
+- Subject-only for small diffs (one concern / few files).
+- Numbered body when the commit spans multiple concerns or many files.
+- Pass the message via HEREDOC as required by the commit workflow.
+- Do not add Co-authored-by unless the user asks.
+- Do not invent ticket IDs (`ZC-123`, etc.).

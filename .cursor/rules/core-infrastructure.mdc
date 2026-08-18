@@ -1,0 +1,32 @@
+---
+description: Core holds shared infrastructure (JPA base types, later Redis/Kafka/config), not feature code.
+globs: core/**/*.java
+alwaysApply: false
+---
+
+# Core infrastructure
+
+Place types under `org.devbot.bookmymovie.core`:
+
+```text
+persistence/   BaseEntity, AuditableEntity, JpaConfig
+cache/         RedisConfig          — when Redis is introduced
+messaging/     KafkaConfig          — only if we actually use Kafka
+config/        other cross-cutting Spring config
+```
+
+Add Redis/Kafka **starters on `core`** only when those classes exist. Do not scaffold unused config.
+
+```java
+// GOOD — mapped superclass for every feature entity
+package org.devbot.bookmymovie.core.persistence;
+@MappedSuperclass
+public abstract class BaseEntity {}
+
+// BAD — movie table in core
+package org.devbot.bookmymovie.core.persistence;
+@Entity
+public class Movie {}
+```
+
+Keep out of `core`: `@RestController`, feature `@Service`, `SecurityFilterChain`, Flyway SQL, `application.properties`. Seat-lock use cases stay in `booking`; core only supplies Redis/JPA plumbing.

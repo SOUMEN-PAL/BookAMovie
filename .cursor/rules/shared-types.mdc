@@ -1,0 +1,29 @@
+---
+description: Shared holds API prefixes, envelopes, and global errors — not feature or infrastructure code.
+globs: shared/**/*.java
+alwaysApply: false
+---
+
+# Shared types
+
+Target packages under `org.devbot.bookmymovie.shared` (add classes when needed; `api/` prefixes already exist):
+
+```text
+api/          AppApi, WebApi, ApiPaths
+exception/    GlobalExceptionHandler, ResourceNotFoundException
+response/     ApiResponse, ErrorResponse
+pagination/   PageResponse
+validation/   reusable constraints
+```
+
+```java
+// GOOD — envelope used by every controller
+package org.devbot.bookmymovie.shared.response;
+public record ApiResponse<T>(T data) {}
+
+// BAD — movie DTO in shared
+package org.devbot.bookmymovie.shared.response;
+public record MovieSummaryResponse(Long id, String title) {}
+```
+
+Keep out of `shared`: feature `@RestController`s, `@Entity`, `SecurityFilterChain`, `BaseEntity` / `RedisConfig` (`core`), Flyway (`app`).
