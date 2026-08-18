@@ -1,0 +1,46 @@
+---
+description: Place controllers, services, and persistence in feature api/domain/data packages.
+globs: features/**/*.java
+alwaysApply: false
+---
+
+# Feature layer packages
+
+Inside `features/<name>`, put classes in:
+
+```text
+org.devbot.bookmymovie.<name>.api
+org.devbot.bookmymovie.<name>.domain
+org.devbot.bookmymovie.<name>.data
+```
+
+| Package | Allowed |
+|---------|---------|
+| `api` | `@AppApi` / `@WebApi` controllers, HTTP DTOs, `@RestControllerAdvice`, web/security `@Configuration` |
+| `domain` | `@Service`, use cases, business rules |
+| `data` | `@Entity`, `JpaRepository` |
+
+```java
+// BAD — entity in api, controller in data
+package org.devbot.bookmymovie.movie.api;
+@Entity
+public class Movie {}
+
+// GOOD
+package org.devbot.bookmymovie.movie.data;
+@Entity
+public class Movie {}
+
+package org.devbot.bookmymovie.movie.api;
+@AppApi
+public class MovieAppController {
+    @GetMapping("/movies")
+    public List<MovieSummaryResponse> list() { return List.of(); }
+}
+```
+
+Use `@AppApi` (`/api/v1/app`) and `@WebApi` (`/api/v1/web`) from `org.devbot.bookmymovie.shared.api`. Map resources on methods only — do not add a second type-level `@RequestMapping`.
+
+- `api` calls `domain`. `domain` calls `data` in the **same** feature.
+- Do not put JPA entities on controller return types; map to DTOs in `api`.
+- Auth security config (`SecurityFilterChain`, filters) goes in `org.devbot.bookmymovie.auth.api`, not another feature and not `core`.

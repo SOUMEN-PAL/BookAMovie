@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.devbot</groupId>
+        <artifactId>BookMyMovie</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <artifactId>bookmymovie-features</artifactId>
+    <packaging>pom</packaging>
+    <name>BookMyMovie Features</name>
+    <description>Feature modules</description>
+
+    <modules>
+        <module>auth</module>
+        <module>user</module>
+        <module>movie</module>
+        <module>theatre</module>
+        <module>show</module>
+        <module>booking</module>
+        <module>payment</module>
+        <module>review</module>
+    </modules>
+</project>
