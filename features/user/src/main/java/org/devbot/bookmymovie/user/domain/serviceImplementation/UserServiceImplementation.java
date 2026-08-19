@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImplementation implements UserService {
+
     private final UserJpaRepository repo;
     private final UserMapper mapper;
 
-
     @Override
     public UserResponse getUserByEmail(String email) {
-        User user =  repo.getUserByEmail(email);
+        User user = repo.getUserByEmail(email);
         return mapper.toResponse(user);
     }
 
@@ -26,7 +26,4 @@ public class UserServiceImplementation implements UserService {
         User savedUser = repo.save(user);
         return mapper.toResponse(savedUser);
     }
-
-
-
 }

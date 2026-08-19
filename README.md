@@ -164,7 +164,32 @@ Defined in `org.devbot.bookmymovie.shared.api`. Put resource paths on methods (`
 ### Prerequisites
 
 - JDK 17
-- PostgreSQL (needed once persistence is wired)
+- PostgreSQL on `localhost:5432`
+
+### Database setup (one time)
+
+Create the database (Spring does not create it for you):
+
+```bash
+psql -h localhost -U postgres -c "CREATE DATABASE bookmymovie;"
+```
+
+Copy local profile files from the committed templates (gitignored — not in the repo):
+
+```bash
+cp app/src/main/resources/application-dev.properties.example app/src/main/resources/application-dev.properties
+cp app/src/main/resources/application-prod.properties.example app/src/main/resources/application-prod.properties
+```
+
+Dev defaults in the example: database `bookmymovie`, user `postgres`, password `root`.
+
+If Hibernate previously failed on a reserved table name, drop partial schema before restarting:
+
+```sql
+DROP TABLE IF EXISTS sessions CASCADE;
+```
+
+The `User` entity maps to table `users` (PostgreSQL reserves the name `user`).
 
 ### Compile
 
@@ -172,11 +197,26 @@ Defined in `org.devbot.bookmymovie.shared.api`. Put resource paths on methods (`
 ./mvnw -DskipTests compile
 ```
 
-### Run (after database config exists)
+### Run
+
+Dev is the default profile (`spring.profiles.default=dev`):
 
 ```bash
 ./mvnw -pl app spring-boot:run
 ```
+
+Production — activate at runtime with env vars (no secrets in git):
+
+```bash
+SPRING_PROFILES_ACTIVE=prod \
+  DATABASE_URL=jdbc:postgresql://host:5432/bookmymovie \
+  DATABASE_USERNAME=... \
+  DATABASE_PASSWORD=... \
+  JWT_SECRET=... \
+  java -jar app/target/bookmymovie-app-0.0.1-SNAPSHOT.jar
+```
+
+Or set `SPRING_PROFILES_ACTIVE=prod` in the IDE run configuration and supply the env vars there.
 
 ## Docs
 

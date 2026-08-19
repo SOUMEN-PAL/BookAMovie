@@ -1,0 +1,13 @@
+spring.datasource.url=jdbc:postgresql://localhost:5432/bookmymovie
+spring.datasource.username=postgres
+spring.datasource.password=root
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+logging.level.org.devbot=DEBUG
+logging.level.org.springframework.security=DEBUG
+
+bookmymovie.auth.jwt.secret=dev-only-change-me
+bookmymovie.auth.jwt.access-token-ttl=15m

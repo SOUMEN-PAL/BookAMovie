@@ -1,5 +1,6 @@
 package org.devbot.bookmymovie.auth.domain.dataModels;
 
+import java.util.Collection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,6 @@ import org.devbot.bookmymovie.user.data.entities.UserStatus;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import java.util.Collection;
 
 @Data
 @NoArgsConstructor
