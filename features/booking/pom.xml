@@ -10,12 +10,24 @@
     </parent>
     <artifactId>bookmymovie-booking</artifactId>
     <name>BookMyMovie Booking</name>
-    <description>Booking feature</description>
+    <description>Booking and BookingSeat</description>
 
     <dependencies>
         <dependency>
             <groupId>org.devbot</groupId>
             <artifactId>bookmymovie-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.devbot</groupId>
+            <artifactId>bookmymovie-user</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.devbot</groupId>
+            <artifactId>bookmymovie-show</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.devbot</groupId>
+            <artifactId>bookmymovie-theatre</artifactId>
         </dependency>
     </dependencies>
 </project>

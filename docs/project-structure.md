@@ -4,7 +4,7 @@ This is the Maven layout we use now and the layering we keep as the project grow
 
 ## Current modules
 
-One Maven module per feature. Layers inside a feature are **packages**, not extra jars.
+One Maven module per feature from the v1 entity list (Screen/Seat stay with Theatre; BookingSeat stays with Booking). Layers inside a feature are **packages**, not extra jars.
 
 ```text
 BookMyMovie/                          parent POM (versions, reactor)
@@ -12,17 +12,30 @@ BookMyMovie/                          parent POM (versions, reactor)
 ├── shared/                           cross-cutting types (no feature code)
 ├── core/                             infrastructure: JPA base types, later Redis/Kafka/config
 └── features/
-    ├── auth/                         Security starter + auth code
-    ├── user/
-    ├── movie/
-    ├── theatre/                      includes Screen and Seat
-    ├── show/
-    ├── booking/
-    ├── payment/
-    └── review/
+    ├── user/                         User
+    ├── auth/                         Security starter + auth
+    ├── movie/                        Movie
+    ├── theatre/                      Theatre, Screen, Seat
+    ├── show/                         Show
+    ├── booking/                      Booking, BookingSeat
+    ├── payment/                      Payment
+    └── review/                       Review
 ```
 
-`app` depends on each feature. Each feature depends on `core`. `core` depends on `shared`. Features do **not** depend on each other. `app` is the composition root.
+`app` depends on each feature. `core` depends on `shared`. Features **may import each other one way** (a DAG). `app` is the composition root.
+
+Feature Maven imports (plus `core` on every feature; `auth` also has Spring Security):
+
+| Feature | Imports |
+|---------|---------|
+| `user`, `movie`, `theatre` | `core` only |
+| `auth` | `user` |
+| `show` | `movie`, `theatre` |
+| `booking` | `user`, `show`, `theatre` |
+| `payment` | `booking` |
+| `review` | `user`, `movie` |
+
+Cycles are forbidden (`movie` must not depend on `show`; `user` must not depend on `booking`).
 
 ## Dependencies
 
@@ -30,8 +43,12 @@ BookMyMovie/                          parent POM (versions, reactor)
 |--------|-----------|
 | `shared` | Lombok, Validation, Web MVC |
 | `core` | `shared` + Data JPA; Redis/Kafka starters only when those packages exist |
-| `features/auth` | `core` + Spring Security |
-| other features | `core` only |
+| `features/user`, `movie`, `theatre` | `core` |
+| `features/auth` | `core` + `user` + Spring Security |
+| `features/show` | `core` + `movie` + `theatre` |
+| `features/booking` | `core` + `user` + `show` + `theatre` |
+| `features/payment` | `core` + `booking` |
+| `features/review` | `core` + `user` + `movie` |
 | `app` | all features + Flyway, Postgres, Actuator, Boot plugin |
 
 Feature-specific extras (JWT, payment SDK) go on **that feature's POM**. Cross-cutting infrastructure (JPA auditing, Redis, Kafka) belongs on **core**, added when we actually use it.
@@ -93,7 +110,7 @@ org.devbot.bookmymovie.core/
 - **messaging** — Kafka producer/consumer factory only if the project uses Kafka. Do not add the starter “just in case”.
 - **config** — clocks, object mappers, shared `@Configuration` that is not HTTP-API.
 
-Do **not** put in `core`: `@RestController`, feature services, `GrantedAuthority`, `SecurityFilterChain`, Flyway migrations, or `application.properties` (those stay in `app` / features).
+Do **not** put in `core`: `@RestController`, feature services, feature entities (`User`, `Movie`, `Show`, `Booking`, …), `GrantedAuthority`, `SecurityFilterChain`, Flyway migrations, or `application.properties`.
 
 `core` package root: `org.devbot.bookmymovie.core`.
 
@@ -108,6 +125,15 @@ features/<name>/src/main/java/org/devbot/bookmymovie/<name>/
 ├── domain/     @Service, use cases, business rules
 └── data/       @Entity, Spring Data repositories
 ```
+
+## JPA associations
+
+Classic mappings (`@ManyToOne`, `@OneToMany`, join fetch) are allowed:
+
+- **Inside a feature jar** — e.g. `Theatre` → `Screen` → `Seat` in `theatre`.
+- **Toward a Maven dependency** — e.g. `Show` → `Movie` / `Theatre` / `Screen`; `Booking` → `User` / `Show` / `Seat`; `Review` → `User` / `Movie`; `Payment` → `Booking`.
+
+Do **not** map toward a module that must not depend on you (`Movie` must not `@OneToMany Show`).
 
 ## HTTP prefixes
 
@@ -144,9 +170,9 @@ That serves `GET /api/v1/app/movies`. Use `@WebApi` the same way for `/api/v1/we
 ## Rules that must hold
 
 - Do not put Spring Security on `shared` or `core`. Filters and `SecurityFilterChain` live in `features/auth`.
-- Do not depend from `movie` (etc.) onto `auth`. The running app gets Security because `app` depends on `auth`.
+- Feature Maven dependencies follow the DAG only. No cycles.
 - Do not expose JPA entities from controllers. Use DTOs in `api`.
-- `domain` may use `data` in the same feature. `api` may use `domain` in the same feature. `api` must not talk to another feature's `data`.
+- `domain` may use `data` in the same feature. `api` may use `domain` in the same feature.
 - Screen and Seat stay in `theatre`. `BookingSeat` stays in `booking`.
 
 ## Future: split a feature into Maven modules
@@ -162,4 +188,4 @@ features/booking/
 └── data/     bookmymovie-booking-data
 ```
 
-Dependency chain if split: `api → domain → data → core`. Other features still must not depend on `auth`. Packages stay the same; only the Maven boundary changes.
+Dependency chain if split: `api → domain → data → core`. Packages stay the same; only the Maven boundary changes.

@@ -52,7 +52,7 @@ Phase 7    Docker, Kafka, monitoring, load testing, AWS
 
 ## Architecture
 
-Modular monolith: `app` is the Spring Boot process. Features are one Maven module each. Layers inside a feature are **packages** (`api` / `domain` / `data`), not extra jars.
+Modular monolith: `app` is the Spring Boot process. Features are one Maven module each. Layers inside a feature are **packages** (`api` / `domain` / `data`), not extra jars. Features may **import each other one way** (no cycles).
 
 ```text
 Clients
@@ -62,22 +62,33 @@ Clients
 App shell
 └─ app                    Boot plugin, Flyway, Postgres, Actuator
 
-Features (no feature-to-feature deps)
-├─ auth                   Spring Security
-├─ user
+Features
+├─ user                   User
+├─ auth                   Spring Security (depends on user)
 ├─ movie
 ├─ theatre                Screen + Seat
-├─ show
-├─ booking
-├─ payment
-└─ review
+├─ show                   depends on movie + theatre
+├─ booking                Booking + BookingSeat; depends on user + show + theatre
+├─ payment                depends on booking
+└─ review                 depends on user + movie
 
 Foundations
 ├─ shared                 Web MVC, validation, API prefixes, later envelopes/errors
-└─ core                   Data JPA; later BaseEntity, Redis, Kafka config
+└─ core                   Data JPA; BaseEntity, Role/Permission; later Redis, Kafka config
 ```
 
 Full layout and placement rules: [docs/project-structure.md](docs/project-structure.md).
+
+Feature Maven imports (plus `core` on every feature; `auth` also has Spring Security):
+
+| Feature | Imports |
+| --- | --- |
+| `user`, `movie`, `theatre` | `core` only |
+| `auth` | `user` |
+| `show` | `movie`, `theatre` |
+| `booking` | `user`, `show`, `theatre` |
+| `payment` | `booking` |
+| `review` | `user`, `movie` |
 
 ## Module Map
 
@@ -85,13 +96,13 @@ Full layout and placement rules: [docs/project-structure.md](docs/project-struct
 | --- | --- |
 | `app` | `@SpringBootApplication`, `application.properties`, Flyway, Actuator, Postgres driver |
 | `shared` | Lombok, Validation, Web MVC; `@AppApi` / `@WebApi` / `ApiPaths`; later `ApiResponse`, pagination, global errors |
-| `core` | Data JPA; later `BaseEntity`, `JpaConfig`, Redis/Kafka config when those exist |
+| `core` | Data JPA; `BaseEntity`, `JpaConfig`, Role/Permission; Redis/Kafka config when those exist |
+| `user` | User entity and profile APIs |
 | `auth` | Security starter; filters and `SecurityFilterChain` |
-| `user` | Profile APIs |
 | `movie` | Catalog, now-showing, upcoming |
 | `theatre` | Theatres, screens, seats |
-| `show` | Showtimes |
-| `booking` | Bookings and seat occupancy |
+| `show` | Showtimes (`@ManyToOne` Movie / Theatre / Screen) |
+| `booking` | Bookings and BookingSeat |
 | `payment` | Payments and webhooks |
 | `review` | Movie reviews |
 

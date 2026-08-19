@@ -1,4 +1,4 @@
-package org.devbot.bookmymovie.auth.domain;
+package org.devbot.bookmymovie.auth.domain.configs;
 
 import java.util.ArrayList;
 import java.util.Collection;

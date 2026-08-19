@@ -18,7 +18,7 @@ org.devbot.bookmymovie.<name>.data
 |---------|---------|
 | `api` | `@AppApi` / `@WebApi` controllers, HTTP DTOs, `@RestControllerAdvice`, web/security `@Configuration` |
 | `domain` | `@Service`, use cases, business rules |
-| `data` | `@Entity`, `JpaRepository` |
+| `data` | `@Entity`, Spring Data repositories |
 
 ```java
 // BAD — entity in api, controller in data
@@ -44,3 +44,4 @@ Use `@AppApi` (`/api/v1/app`) and `@WebApi` (`/api/v1/web`) from `org.devbot.boo
 - `api` calls `domain`. `domain` calls `data` in the **same** feature.
 - Do not put JPA entities on controller return types; map to DTOs in `api`.
 - Auth security config (`SecurityFilterChain`, filters) goes in `org.devbot.bookmymovie.auth.api`, not another feature and not `core`.
+- `@ManyToOne` / `@OneToMany` are allowed inside the jar and toward a module this feature depends on (`show` → `Movie`; `booking` → `User` / `Show`).

@@ -1,2 +1,2 @@
-/** payment HTTP API */
+/** Payment HTTP API */
 package org.devbot.bookmymovie.payment.api;
