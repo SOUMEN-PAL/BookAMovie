@@ -1,2 +1,2 @@
-/** booking HTTP API */
+/** Booking HTTP API */
 package org.devbot.bookmymovie.booking.api;

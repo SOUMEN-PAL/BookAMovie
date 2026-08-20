@@ -10,6 +10,7 @@ Place types under `org.devbot.bookmymovie.core`:
 
 ```text
 persistence/   BaseEntity, AuditableEntity, JpaConfig
+security/      Role, Permission, RolePermissions  — no GrantedAuthority
 cache/         RedisConfig          — when Redis is introduced
 messaging/     KafkaConfig          — only if we actually use Kafka
 config/        other cross-cutting Spring config
@@ -29,4 +30,4 @@ package org.devbot.bookmymovie.core.persistence;
 public class Movie {}
 ```
 
-Keep out of `core`: `@RestController`, feature `@Service`, `SecurityFilterChain`, Flyway SQL, `application.properties`. Seat-lock use cases stay in `booking`; core only supplies Redis/JPA plumbing.
+Keep out of `core`: `@RestController`, feature `@Service`, `GrantedAuthority`, `SecurityFilterChain`, Flyway SQL, `application.properties`. Seat-lock use cases stay in `booking`; core only supplies Redis/JPA plumbing and domain role/permission types.

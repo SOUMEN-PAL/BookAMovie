@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * THEATER_ADMIN / SUPERADMIN API under {@value ApiPaths#WEB}.
+ * THEATER_ADMIN / ADMIN / SUPER_ADMIN API under {@value ApiPaths#WEB}.
  * Map resources on methods ({@code @GetMapping("/movies")}), not a second type-level
  * {@code @RequestMapping} — Spring will not concatenate two type-level mappings.
  */

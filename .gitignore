@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local Spring profiles (copy from *.example) ###
+app/src/main/resources/application-dev.properties
+app/src/main/resources/application-prod.properties

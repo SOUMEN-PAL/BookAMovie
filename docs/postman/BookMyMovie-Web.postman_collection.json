@@ -1,0 +1,316 @@
+{
+  "info": {
+    "_postman_id": "bmm-web-auth-collection",
+    "name": "BookMyMovie Web",
+    "description": "Current `/api/v1/web` auth endpoints. Register/login/refresh capture tokens into collection variables. Refresh cookie works when Postman cookie jar is enabled.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    },
+    {
+      "key": "email",
+      "value": "web.user@example.com"
+    },
+    {
+      "key": "password",
+      "value": "Passw0rd!"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.accessToken) pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "  if (body.refreshToken) pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "  if (body.user && body.user.id != null) pm.collectionVariables.set('userId', String(body.user.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Web User\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/web/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "web", "auth", "register"]
+            },
+            "description": "Public. Creates user + WEB session. Sets HttpOnly refreshToken cookie and returns AuthResponse."
+          },
+          "response": []
+        },
+        {
+          "name": "Signup",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.accessToken) pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "  if (body.refreshToken) pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "  if (body.user && body.user.id != null) pm.collectionVariables.set('userId', String(body.user.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Web User\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/web/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "web", "auth", "signup"]
+            },
+            "description": "Alias of register."
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.accessToken) pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "  if (body.refreshToken) pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "  if (body.user && body.user.id != null) pm.collectionVariables.set('userId', String(body.user.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"sessionType\": \"WEB\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/web/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "web", "auth", "login"]
+            },
+            "description": "Public. Web controller forces SessionType.WEB for the session."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh (cookie)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.accessToken) pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "  if (body.refreshToken) pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "  if (body.user && body.user.id != null) pm.collectionVariables.set('userId', String(body.user.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/web/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "web", "auth", "refresh"]
+            },
+            "description": "Uses HttpOnly refreshToken cookie from a prior register/login. Enable Postman cookie jar."
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh (body)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.accessToken) pm.collectionVariables.set('accessToken', body.accessToken);",
+                  "  if (body.refreshToken) pm.collectionVariables.set('refreshToken', body.refreshToken);",
+                  "  if (body.user && body.user.id != null) pm.collectionVariables.set('userId', String(body.user.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/web/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "web", "auth", "refresh"]
+            },
+            "description": "Sends refresh token in JSON body (also updates cookie on success)."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/web/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "web", "auth", "logout"]
+            },
+            "description": "Requires Bearer accessToken. Revokes current session and clears refresh cookie."
+          },
+          "response": []
+        },
+        {
+          "name": "Revoke session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}},\n  \"sessionId\": {{sessionId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/web/auth/sessions/revoke",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "web", "auth", "sessions", "revoke"]
+            },
+            "description": "Requires Bearer token with ADMIN_SESSION_REVOKE. Set sessionId manually (not returned in AuthResponse)."
+          },
+          "response": []
+        },
+        {
+          "name": "Revoke all sessions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/web/auth/sessions/revoke-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "web", "auth", "sessions", "revoke-all"]
+            },
+            "description": "Requires Bearer token with ADMIN_SESSION_REVOKE."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,2 +1,2 @@
-/** auth Persistence */
+/** Auth persistence */
 package org.devbot.bookmymovie.auth.data;

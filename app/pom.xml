@@ -14,11 +14,11 @@
     <dependencies>
         <dependency>
             <groupId>org.devbot</groupId>
-            <artifactId>bookmymovie-auth</artifactId>
+            <artifactId>bookmymovie-user</artifactId>
         </dependency>
         <dependency>
             <groupId>org.devbot</groupId>
-            <artifactId>bookmymovie-user</artifactId>
+            <artifactId>bookmymovie-auth</artifactId>
         </dependency>
         <dependency>
             <groupId>org.devbot</groupId>

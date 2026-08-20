@@ -1,2 +1,2 @@
-/** movie Persistence */
+/** Movie persistence */
 package org.devbot.bookmymovie.movie.data;

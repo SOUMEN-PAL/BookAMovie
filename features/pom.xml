@@ -13,8 +13,8 @@
     <description>Feature modules</description>
 
     <modules>
-        <module>auth</module>
         <module>user</module>
+        <module>auth</module>
         <module>movie</module>
         <module>theatre</module>
         <module>show</module>

@@ -17,5 +17,9 @@
             <groupId>org.devbot</groupId>
             <artifactId>bookmymovie-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.devbot</groupId>
+            <artifactId>bookmymovie-booking</artifactId>
+        </dependency>
     </dependencies>
 </project>

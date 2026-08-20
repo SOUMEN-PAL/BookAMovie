@@ -7,8 +7,11 @@ Frozen before implementation. This is the contract we plan to build against.
 ```text
 USER
 THEATER_ADMIN
-SUPERADMIN
+ADMIN
+SUPER_ADMIN
 ```
+
+Fine-grained permission names (`SHOW_CREATE`, etc.) derived from these roles: [v1-authorities.md](v1-authorities.md).
 
 ## Domain entities
 
@@ -55,29 +58,41 @@ Booking
 
 ## Authentication
 
-### Register
+Implemented for web (`/api/v1/web/auth/...`) and app (`/api/v1/app/auth/...`). Web keeps the refresh token in an HttpOnly cookie; app sends it in the body.
+
+### Register / signup ✓
 
 ```http
-POST /api/v1/auth/register
+POST /api/v1/{web|app}/auth/register
+POST /api/v1/{web|app}/auth/signup
 ```
 
-### Login
+### Login ✓
 
 ```http
-POST /api/v1/auth/login
+POST /api/v1/{web|app}/auth/login
 ```
 
-### Refresh token
+### Refresh token ✓
 
 ```http
-POST /api/v1/auth/refresh
+POST /api/v1/{web|app}/auth/refresh
 ```
 
-### Logout
+### Logout ✓
 
 ```http
-POST /api/v1/auth/logout
+POST /api/v1/{web|app}/auth/logout
 ```
+
+### Admin session revoke ✓
+
+```http
+POST /api/v1/{web|app}/auth/sessions/revoke
+POST /api/v1/{web|app}/auth/sessions/revoke-all
+```
+
+Requires `ADMIN_SESSION_REVOKE`.
 
 ### Current user
 
@@ -148,7 +163,7 @@ GET /api/v1/movies/now-showing
 GET /api/v1/movies/upcoming
 ```
 
-## SUPERADMIN
+## ADMIN
 
 ### Create movie
 
@@ -258,7 +273,7 @@ Query:
 ?date=2026-08-20
 ```
 
-## SUPERADMIN
+## ADMIN
 
 ### Create theatre
 
@@ -626,7 +641,7 @@ POST /api/v1/payments/{paymentId}/refund
 Authorization:
 
 ```text
-SUPERADMIN
+ADMIN
 ```
 
 or potentially an internal / admin payment service.
@@ -712,7 +727,7 @@ averageOccupancy
 
 ---
 
-# 13. SUPERADMIN Dashboard
+# 13. ADMIN Dashboard
 
 ### Platform statistics
 
@@ -774,7 +789,8 @@ Enums:
 Role:
 USER
 THEATER_ADMIN
-SUPERADMIN
+ADMIN
+SUPER_ADMIN
 
 UserStatus:
 ACTIVE
@@ -1541,7 +1557,7 @@ Do not create all 10 entities immediately.
 ```text
 Phase 1
 ────────────────────
-Auth
+Auth ✓
 Movies
 Theatres
 Screens

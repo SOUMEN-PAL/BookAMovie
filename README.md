@@ -1,6 +1,6 @@
 # BookMyMovie
 
-BookMyMovie is a movie-ticket booking backend: browse movies and theatres, pick seats for a show, lock and pay, then manage bookings and reviews. Clients are split into a **mobile/user API** (`/api/v1/app`) and a **theatre-admin / superadmin API** (`/api/v1/web`).
+BookMyMovie is a movie-ticket booking backend: browse movies and theatres, pick seats for a show, lock and pay, then manage bookings and reviews. Clients are split into a **mobile/user API** (`/api/v1/app`) and a **theatre-admin / admin / super-admin API** (`/api/v1/web`).
 
 This README follows the current Maven POMs and Spring Boot BOM. Architecture and the frozen v1 API live under [`docs/`](docs/). If a doc disagrees with the version tables below, the POMs are the source of truth.
 
@@ -26,22 +26,25 @@ The icon row is a quick overview (Redis, Kafka, Docker, and AWS are **planned**)
 
 ## What we are building
 
-Roles: `USER`, `THEATER_ADMIN`, `SUPERADMIN`.
+Roles: `USER`, `THEATER_ADMIN`, `ADMIN`, `SUPER_ADMIN`.
 
 Domain: User, Movie, Review, Theatre, Screen, Seat, Show, Booking, BookingSeat, Payment.
 
-- Auth (register, login, refresh, logout)
-- Movies, theatres, screens, seats, and shows
-- Seat availability and bookings (later: locks, Redis, concurrent booking)
-- Payments (later: webhooks, idempotency)
-- Reviews, statistics, and admin dashboards
+- [x] Auth (register/signup, login, refresh, logout; web + app; JWT + sessions)
+- [x] Shared `ApiError` + `GlobalExceptionHandler`; auth `AuthExceptionHandler`
+- [x] RBAC (`Role` / `Permission` / `RolePermissions`; e.g. `ADMIN_SESSION_REVOKE`)
+- [x] User + Session domain services (create/rotate/revoke sessions)
+- [ ] Movies, theatres, screens, seats, and shows
+- [ ] Seat availability and bookings (later: locks, Redis, concurrent booking)
+- [ ] Payments (later: webhooks, idempotency)
+- [ ] Reviews, statistics, and admin dashboards
 
-The API contract is frozen in [docs/v1-api-contract-and-domain.md](docs/v1-api-contract-and-domain.md).
+The API contract is frozen in [docs/v1-api-contract-and-domain.md](docs/v1-api-contract-and-domain.md). Web auth Postman collection: [docs/postman/BookMyMovie-Web.postman_collection.json](docs/postman/BookMyMovie-Web.postman_collection.json).
 
 ### Build order
 
 ```text
-Phase 1    Auth, movies, theatres, screens, seats, shows
+Phase 1    Auth ✓  · movies, theatres, screens, seats, shows (next)
 Phase 2    Bookings, BookingSeat, seat availability
 Phase 3    Concurrent booking, transactions, locking
 Phase 4    Redis, seat locks, expiration
@@ -52,7 +55,7 @@ Phase 7    Docker, Kafka, monitoring, load testing, AWS
 
 ## Architecture
 
-Modular monolith: `app` is the Spring Boot process. Features are one Maven module each. Layers inside a feature are **packages** (`api` / `domain` / `data`), not extra jars.
+Modular monolith: `app` is the Spring Boot process. Features are one Maven module each. Layers inside a feature are **packages** (`api` / `domain` / `data`), not extra jars. Features may **import each other one way** (no cycles).
 
 ```text
 Clients
@@ -62,36 +65,47 @@ Clients
 App shell
 └─ app                    Boot plugin, Flyway, Postgres, Actuator
 
-Features (no feature-to-feature deps)
-├─ auth                   Spring Security
-├─ user
+Features
+├─ user                   User
+├─ auth                   Spring Security (depends on user)
 ├─ movie
 ├─ theatre                Screen + Seat
-├─ show
-├─ booking
-├─ payment
-└─ review
+├─ show                   depends on movie + theatre
+├─ booking                Booking + BookingSeat; depends on user + show + theatre
+├─ payment                depends on booking
+└─ review                 depends on user + movie
 
 Foundations
-├─ shared                 Web MVC, validation, API prefixes, later envelopes/errors
-└─ core                   Data JPA; later BaseEntity, Redis, Kafka config
+├─ shared                 Web MVC, validation, API prefixes, ApiError, GlobalExceptionHandler
+└─ core                   Data JPA; BaseEntity, Role/Permission; later Redis, Kafka config
 ```
 
 Full layout and placement rules: [docs/project-structure.md](docs/project-structure.md).
+
+Feature Maven imports (plus `core` on every feature; `auth` also has Spring Security):
+
+| Feature | Imports |
+| --- | --- |
+| `user`, `movie`, `theatre` | `core` only |
+| `auth` | `user` |
+| `show` | `movie`, `theatre` |
+| `booking` | `user`, `show`, `theatre` |
+| `payment` | `booking` |
+| `review` | `user`, `movie` |
 
 ## Module Map
 
 | Module | Responsibility |
 | --- | --- |
 | `app` | `@SpringBootApplication`, `application.properties`, Flyway, Actuator, Postgres driver |
-| `shared` | Lombok, Validation, Web MVC; `@AppApi` / `@WebApi` / `ApiPaths`; later `ApiResponse`, pagination, global errors |
-| `core` | Data JPA; later `BaseEntity`, `JpaConfig`, Redis/Kafka config when those exist |
-| `auth` | Security starter; filters and `SecurityFilterChain` |
-| `user` | Profile APIs |
+| `shared` | Lombok, Validation, Web MVC; `@AppApi` / `@WebApi` / `ApiPaths`; `ApiError`, `GlobalExceptionHandler`, `@ValidPassword` |
+| `core` | Data JPA; `BaseEntity`, `JpaConfig`, Role/Permission; Redis/Kafka config when those exist |
+| `user` | User + Session entities and domain services |
+| `auth` | Security starter; JWT filter, `SecurityFilterChain`; web/app auth APIs; `AuthExceptionHandler` |
 | `movie` | Catalog, now-showing, upcoming |
 | `theatre` | Theatres, screens, seats |
-| `show` | Showtimes |
-| `booking` | Bookings and seat occupancy |
+| `show` | Showtimes (`@ManyToOne` Movie / Theatre / Screen) |
+| `booking` | Bookings and BookingSeat |
 | `payment` | Payments and webhooks |
 | `review` | Movie reviews |
 
@@ -144,7 +158,7 @@ Managed by `spring-boot-starter-parent` **4.1.0** unless noted. Resolved from th
 | Client | Prefix | Annotation |
 | --- | --- | --- |
 | USER / mobile | `/api/v1/app` | `@AppApi` |
-| THEATER_ADMIN / SUPERADMIN | `/api/v1/web` | `@WebApi` |
+| THEATER_ADMIN / ADMIN / SUPER_ADMIN | `/api/v1/web` | `@WebApi` |
 
 Defined in `org.devbot.bookmymovie.shared.api`. Put resource paths on methods (`@GetMapping("/movies")`), not a second type-level `@RequestMapping`.
 
@@ -153,7 +167,32 @@ Defined in `org.devbot.bookmymovie.shared.api`. Put resource paths on methods (`
 ### Prerequisites
 
 - JDK 17
-- PostgreSQL (needed once persistence is wired)
+- PostgreSQL on `localhost:5432`
+
+### Database setup (one time)
+
+Create the database (Spring does not create it for you):
+
+```bash
+psql -h localhost -U postgres -c "CREATE DATABASE bookmymovie;"
+```
+
+Copy local profile files from the committed templates (gitignored — not in the repo):
+
+```bash
+cp app/src/main/resources/application-dev.properties.example app/src/main/resources/application-dev.properties
+cp app/src/main/resources/application-prod.properties.example app/src/main/resources/application-prod.properties
+```
+
+Dev defaults in the example: database `bookmymovie`, user `postgres`, password `root`.
+
+If Hibernate previously failed on a reserved table name, drop partial schema before restarting:
+
+```sql
+DROP TABLE IF EXISTS sessions CASCADE;
+```
+
+The `User` entity maps to table `users` (PostgreSQL reserves the name `user`).
 
 ### Compile
 
@@ -161,11 +200,27 @@ Defined in `org.devbot.bookmymovie.shared.api`. Put resource paths on methods (`
 ./mvnw -DskipTests compile
 ```
 
-### Run (after database config exists)
+### Run
+
+Dev is the default profile (`spring.profiles.default=dev`):
 
 ```bash
 ./mvnw -pl app spring-boot:run
 ```
+
+Production — activate at runtime with env vars (no secrets in git):
+
+```bash
+SPRING_PROFILES_ACTIVE=prod \
+  DATABASE_URL=jdbc:postgresql://host:5432/bookmymovie \
+  DATABASE_USERNAME=... \
+  DATABASE_PASSWORD=... \
+  JWT_ACCESS_SECRET=... \
+  JWT_REFRESH_SECRET=... \
+  java -jar app/target/bookmymovie-app-0.0.1-SNAPSHOT.jar
+```
+
+Or set `SPRING_PROFILES_ACTIVE=prod` in the IDE run configuration and supply the env vars there.
 
 ## Docs
 
@@ -173,3 +228,5 @@ Defined in `org.devbot.bookmymovie.shared.api`. Put resource paths on methods (`
 | --- | --- |
 | [docs/project-structure.md](docs/project-structure.md) | Modules, packages, what belongs in `shared` / `core` |
 | [docs/v1-api-contract-and-domain.md](docs/v1-api-contract-and-domain.md) | Frozen v1 APIs, entities, DTOs, phases |
+| [docs/v1-authorities.md](docs/v1-authorities.md) | Role → `SHOW_CREATE`-style authorities |
+| [docs/postman/BookMyMovie-Web.postman_collection.json](docs/postman/BookMyMovie-Web.postman_collection.json) | Postman collection for `/api/v1/web/auth` |

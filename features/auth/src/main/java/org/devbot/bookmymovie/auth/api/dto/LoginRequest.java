@@ -1,0 +1,17 @@
+package org.devbot.bookmymovie.auth.api.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import org.devbot.bookmymovie.user.data.entities.SessionType;
+
+public record LoginRequest(
+        @NotBlank @Email String email,
+        @NotBlank String password,
+        SessionType sessionType
+) {
+    public LoginRequest {
+        if (sessionType == null) {
+            sessionType = SessionType.WEB;
+        }
+    }
+}

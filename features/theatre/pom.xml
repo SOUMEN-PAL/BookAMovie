@@ -10,7 +10,7 @@
     </parent>
     <artifactId>bookmymovie-theatre</artifactId>
     <name>BookMyMovie Theatre</name>
-    <description>Theatre feature</description>
+    <description>Theatre, Screen, and Seat</description>
 
     <dependencies>
         <dependency>
