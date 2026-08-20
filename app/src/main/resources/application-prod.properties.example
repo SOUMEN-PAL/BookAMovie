@@ -2,7 +2,10 @@ spring.datasource.url=${DATABASE_URL}
 spring.datasource.username=${DATABASE_USERNAME}
 spring.datasource.password=${DATABASE_PASSWORD}
 
-bookmymovie.auth.jwt.secret=${JWT_SECRET}
+bookmymovie.auth.jwt.access.secret=${JWT_ACCESS_SECRET}
+bookmymovie.auth.jwt.access.ttl=15m
+bookmymovie.auth.jwt.refresh.secret=${JWT_REFRESH_SECRET}
+bookmymovie.auth.jwt.refresh.ttl=7d
 
 logging.level.org.devbot=INFO
 management.endpoints.web.exposure.include=health,info

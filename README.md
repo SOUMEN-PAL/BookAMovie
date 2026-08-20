@@ -212,7 +212,8 @@ SPRING_PROFILES_ACTIVE=prod \
   DATABASE_URL=jdbc:postgresql://host:5432/bookmymovie \
   DATABASE_USERNAME=... \
   DATABASE_PASSWORD=... \
-  JWT_SECRET=... \
+  JWT_ACCESS_SECRET=... \
+  JWT_REFRESH_SECRET=... \
   java -jar app/target/bookmymovie-app-0.0.1-SNAPSHOT.jar
 ```
 

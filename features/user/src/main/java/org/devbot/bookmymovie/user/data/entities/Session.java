@@ -3,10 +3,8 @@ package org.devbot.bookmymovie.user.data.entities;
 import jakarta.persistence.*;
 
 import java.time.Instant;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.*;
 import org.devbot.bookmymovie.core.persistance.AuditableEntity;
 
 @AllArgsConstructor
@@ -14,6 +12,7 @@ import org.devbot.bookmymovie.core.persistance.AuditableEntity;
 @Getter
 @Setter
 @Entity
+@Builder
 @Table(name = "sessions")
 public class Session extends AuditableEntity {
 

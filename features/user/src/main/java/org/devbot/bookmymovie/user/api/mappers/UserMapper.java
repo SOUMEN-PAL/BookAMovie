@@ -1,4 +1,4 @@
-package org.devbot.bookmymovie.user.domain.mappers;
+package org.devbot.bookmymovie.user.api.mappers;
 
 import org.devbot.bookmymovie.user.api.dto.UserResponse;
 import org.devbot.bookmymovie.user.data.entities.User;
@@ -9,6 +9,4 @@ import org.mapstruct.MappingConstants;
 public interface UserMapper {
 
     UserResponse toResponse(User user);
-
-    User toEntity(UserResponse user);
 }
