@@ -55,7 +55,7 @@ Feature-specific extras (JWT, payment SDK) go on **that feature's POM**. Cross-c
 
 ## What belongs in `shared`
 
-HTTP envelope, errors, pagination, and API prefixes used by every feature. **Target shape** (do not create these classes until a feature needs them). `AppApi`, `WebApi`, and `ApiPaths` already exist.
+HTTP envelope, errors, pagination, and API prefixes used by every feature. Target shape:
 
 ```text
 org.devbot.bookmymovie.shared/
@@ -64,22 +64,24 @@ org.devbot.bookmymovie.shared/
 │   ├── WebApi.java
 │   └── ApiPaths.java
 ├── exception/
-│   ├── GlobalExceptionHandler.java
-│   ├── ResourceNotFoundException.java
+│   ├── ApiError.java                      ✓
+│   ├── GlobalExceptionHandler.java        ✓
+│   ├── Session*Exception / User*Exception ✓
 │   └── ...
 ├── response/
-│   ├── ApiResponse.java
-│   └── ErrorResponse.java
+│   ├── ApiResponse.java                   (later)
+│   └── ...
 ├── pagination/
-│   └── PageResponse.java
+│   └── PageResponse.java                  (later)
 └── validation/
-    └── ...
+    ├── ValidPassword.java                 ✓
+    └── ValidPasswordValidator.java        ✓
 ```
 
 - **api** — `/api/v1/app` and `/api/v1/web` prefixes.
-- **exception** — shared exception types and one global `@RestControllerAdvice` so app and web APIs return the same error JSON.
+- **exception** — shared exception types and `GlobalExceptionHandler` (`ApiError` JSON). Security-specific advice (`BadCredentialsException`, etc.) lives in `features/auth` as `AuthExceptionHandler`.
 - **response** / **pagination** — wrappers, not feature DTOs (`MovieSummaryResponse` stays in `movie.api`).
-- **validation** — reusable constraints.
+- **validation** — reusable constraints (e.g. `@ValidPassword`).
 
 Do **not** put in `shared`: feature controllers, entities, `SecurityFilterChain`, Redis/JPA infrastructure (`core`), or Flyway (`app`).
 
@@ -163,7 +165,9 @@ That serves `GET /api/v1/app/movies`. Use `@WebApi` the same way for `/api/v1/we
 | `@RestController`, HTTP DTOs, `SecurityFilterChain`, filters | feature `api` (`auth.api` for security) |
 | `@Service` | feature `domain` |
 | `@Entity`, `JpaRepository` | feature `data` |
-| Generic `ApiResponse`, `ErrorResponse`, `PageResponse`, global exception handler | `shared` (when implemented) |
+| Generic `ApiResponse`, `PageResponse` | `shared` (when implemented) |
+| `ApiError`, `GlobalExceptionHandler` | `shared` ✓ |
+| Security exception advice (`AuthExceptionHandler`) | `features/auth` ✓ |
 | `BaseEntity`, `JpaConfig`, later `RedisConfig` / `KafkaConfig` | `core` |
 | Datasource / Flyway / Actuator | `app` |
 

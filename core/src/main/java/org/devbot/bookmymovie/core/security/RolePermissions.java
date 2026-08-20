@@ -59,6 +59,7 @@ public final class RolePermissions {
             Permission.ADMIN_STATS_READ,
             Permission.ADMIN_USER_READ,
             Permission.ADMIN_USER_STATUS_UPDATE,
+            Permission.ADMIN_SESSION_REVOKE,
             Permission.ADMIN_THEATRE_READ
     );
 

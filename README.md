@@ -30,18 +30,21 @@ Roles: `USER`, `THEATER_ADMIN`, `ADMIN`, `SUPER_ADMIN`.
 
 Domain: User, Movie, Review, Theatre, Screen, Seat, Show, Booking, BookingSeat, Payment.
 
-- Auth (register, login, refresh, logout)
-- Movies, theatres, screens, seats, and shows
-- Seat availability and bookings (later: locks, Redis, concurrent booking)
-- Payments (later: webhooks, idempotency)
-- Reviews, statistics, and admin dashboards
+- [x] Auth (register/signup, login, refresh, logout; web + app; JWT + sessions)
+- [x] Shared `ApiError` + `GlobalExceptionHandler`; auth `AuthExceptionHandler`
+- [x] RBAC (`Role` / `Permission` / `RolePermissions`; e.g. `ADMIN_SESSION_REVOKE`)
+- [x] User + Session domain services (create/rotate/revoke sessions)
+- [ ] Movies, theatres, screens, seats, and shows
+- [ ] Seat availability and bookings (later: locks, Redis, concurrent booking)
+- [ ] Payments (later: webhooks, idempotency)
+- [ ] Reviews, statistics, and admin dashboards
 
-The API contract is frozen in [docs/v1-api-contract-and-domain.md](docs/v1-api-contract-and-domain.md).
+The API contract is frozen in [docs/v1-api-contract-and-domain.md](docs/v1-api-contract-and-domain.md). Web auth Postman collection: [docs/postman/BookMyMovie-Web.postman_collection.json](docs/postman/BookMyMovie-Web.postman_collection.json).
 
 ### Build order
 
 ```text
-Phase 1    Auth, movies, theatres, screens, seats, shows
+Phase 1    Auth ✓  · movies, theatres, screens, seats, shows (next)
 Phase 2    Bookings, BookingSeat, seat availability
 Phase 3    Concurrent booking, transactions, locking
 Phase 4    Redis, seat locks, expiration
@@ -73,7 +76,7 @@ Features
 └─ review                 depends on user + movie
 
 Foundations
-├─ shared                 Web MVC, validation, API prefixes, later envelopes/errors
+├─ shared                 Web MVC, validation, API prefixes, ApiError, GlobalExceptionHandler
 └─ core                   Data JPA; BaseEntity, Role/Permission; later Redis, Kafka config
 ```
 
@@ -95,10 +98,10 @@ Feature Maven imports (plus `core` on every feature; `auth` also has Spring Secu
 | Module | Responsibility |
 | --- | --- |
 | `app` | `@SpringBootApplication`, `application.properties`, Flyway, Actuator, Postgres driver |
-| `shared` | Lombok, Validation, Web MVC; `@AppApi` / `@WebApi` / `ApiPaths`; later `ApiResponse`, pagination, global errors |
+| `shared` | Lombok, Validation, Web MVC; `@AppApi` / `@WebApi` / `ApiPaths`; `ApiError`, `GlobalExceptionHandler`, `@ValidPassword` |
 | `core` | Data JPA; `BaseEntity`, `JpaConfig`, Role/Permission; Redis/Kafka config when those exist |
-| `user` | User entity and profile APIs |
-| `auth` | Security starter; filters and `SecurityFilterChain` |
+| `user` | User + Session entities and domain services |
+| `auth` | Security starter; JWT filter, `SecurityFilterChain`; web/app auth APIs; `AuthExceptionHandler` |
 | `movie` | Catalog, now-showing, upcoming |
 | `theatre` | Theatres, screens, seats |
 | `show` | Showtimes (`@ManyToOne` Movie / Theatre / Screen) |
@@ -226,3 +229,4 @@ Or set `SPRING_PROFILES_ACTIVE=prod` in the IDE run configuration and supply the
 | [docs/project-structure.md](docs/project-structure.md) | Modules, packages, what belongs in `shared` / `core` |
 | [docs/v1-api-contract-and-domain.md](docs/v1-api-contract-and-domain.md) | Frozen v1 APIs, entities, DTOs, phases |
 | [docs/v1-authorities.md](docs/v1-authorities.md) | Role → `SHOW_CREATE`-style authorities |
+| [docs/postman/BookMyMovie-Web.postman_collection.json](docs/postman/BookMyMovie-Web.postman_collection.json) | Postman collection for `/api/v1/web/auth` |

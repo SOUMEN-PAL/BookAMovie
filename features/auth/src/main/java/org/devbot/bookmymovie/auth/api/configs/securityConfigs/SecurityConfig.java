@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -27,7 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @EnableConfigurationProperties(AuthJwtProperties.class)
 @EnableWebSecurity
-@EnableMethodSecurity(securedEnabled = true)
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthfilter;
 
@@ -43,11 +44,15 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                                 // public auth
+                                // public auth (web + app)
                                 .requestMatchers(
-                                        "/api/v1/auth/register",
-                                        "/api/v1/auth/login",
-                                        "/api/v1/auth/refresh"
+                                        "/api/v1/*/auth/register",
+                                        "/api/v1/*/auth/signup",
+                                        "/api/v1/*/auth/login",
+                                        "/api/v1/*/auth/refresh"
                                 ).permitAll()
+                                // Avoid 403 → /error → 403 loop when Security rejects a request
+                                .requestMatchers("/error").permitAll()
                                 // optional ops
                                 .requestMatchers(
                                         "/actuator/health",

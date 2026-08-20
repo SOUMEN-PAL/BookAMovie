@@ -10,7 +10,7 @@ Own-resource suffixes (`_OWN`) are not extra role bits: the caller must have the
 
 | Authority | API |
 |-----------|-----|
-| *(permitAll)* | `POST /api/v1/auth/register`, `/login`, `/refresh` |
+| *(permitAll)* | `POST /api/v1/{web\|app}/auth/register`, `/signup`, `/login`, `/refresh` |
 | *(permitAll + signature)* | `POST /api/v1/payments/webhook` |
 
 ## USER
@@ -71,6 +71,7 @@ Own-resource suffixes (`_OWN`) are not extra role bits: the caller must have the
 | `ADMIN_STATS_READ` | `GET /api/v1/admin/statistics` |
 | `ADMIN_USER_READ` | `GET /api/v1/admin/users`, `GET /api/v1/admin/users/{id}` |
 | `ADMIN_USER_STATUS_UPDATE` | `PUT /api/v1/admin/users/{id}/status` |
+| `ADMIN_SESSION_REVOKE` | `POST /api/v1/*/auth/sessions/revoke`, `/sessions/revoke-all` |
 | `ADMIN_THEATRE_READ` | `GET /api/v1/admin/theatres`, `GET /api/v1/admin/theatres/pending` |
 
 ## Role → authority set
@@ -95,7 +96,7 @@ ADMIN
   MOVIE_CREATE, MOVIE_UPDATE, MOVIE_DELETE
   THEATRE_CREATE, THEATRE_UPDATE, THEATRE_DELETE, THEATRE_APPROVE, THEATRE_REJECT
   PAYMENT_REFUND
-  ADMIN_STATS_READ, ADMIN_USER_READ, ADMIN_USER_STATUS_UPDATE, ADMIN_THEATRE_READ
+  ADMIN_STATS_READ, ADMIN_USER_READ, ADMIN_USER_STATUS_UPDATE, ADMIN_SESSION_REVOKE, ADMIN_THEATRE_READ
 
 SUPER_ADMIN
   all Permission values

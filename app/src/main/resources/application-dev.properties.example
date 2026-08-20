@@ -9,7 +9,7 @@ spring.jpa.show-sql=true
 logging.level.org.devbot=DEBUG
 logging.level.org.springframework.security=DEBUG
 
-bookmymovie.auth.jwt.access.secret=dev-access-secret
+bookmymovie.auth.jwt.access.secret=dev-only-access-secret-key-32bytes!!
 bookmymovie.auth.jwt.access.ttl=15m
-bookmymovie.auth.jwt.refresh.secret=dev-refresh-secret
+bookmymovie.auth.jwt.refresh.secret=dev-only-refresh-secret-key-32bytes!
 bookmymovie.auth.jwt.refresh.ttl=7d
