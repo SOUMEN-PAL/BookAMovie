@@ -56,12 +56,7 @@
             </dependency>
             <dependency>
                 <groupId>org.devbot</groupId>
-                <artifactId>bookmymovie-user</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.devbot</groupId>
-                <artifactId>bookmymovie-auth</artifactId>
+                <artifactId>bookmymovie-identity</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

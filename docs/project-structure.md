@@ -12,8 +12,7 @@ BookMyMovie/                          parent POM (versions, reactor)
 ├── shared/                           cross-cutting types (no feature code)
 ├── core/                             infrastructure: JPA base types, later Redis/Kafka/config
 └── features/
-    ├── user/                         User
-    ├── auth/                         Security starter + auth
+    ├── identity/                     User, Session, SecurityFilterChain + JWT + auth APIs
     ├── movie/                        Movie
     ├── theatre/                      Theatre, Screen, Seat
     ├── show/                         Show
@@ -24,31 +23,30 @@ BookMyMovie/                          parent POM (versions, reactor)
 
 `app` depends on each feature. `core` depends on `shared`. Features **may import each other one way** (a DAG). `app` is the composition root.
 
-Feature Maven imports (plus `core` on every feature; `auth` also has Spring Security):
+Feature Maven imports (plus `core` on every feature — `core` includes Spring Security):
 
 | Feature | Imports |
 |---------|---------|
-| `user`, `movie`, `theatre` | `core` only |
-| `auth` | `user` |
+| `identity`, `movie`, `theatre` | `core` only |
 | `show` | `movie`, `theatre` |
-| `booking` | `user`, `show`, `theatre` |
+| `booking` | `identity`, `show`, `theatre` |
 | `payment` | `booking` |
-| `review` | `user`, `movie` |
+| `review` | `identity`, `movie` |
 
-Cycles are forbidden (`movie` must not depend on `show`; `user` must not depend on `booking`).
+Cycles are forbidden (`movie` must not depend on `show`; `identity` must not depend on `booking`).
 
 ## Dependencies
 
 | Module | Libraries |
 |--------|-----------|
 | `shared` | Lombok, Validation, Web MVC |
-| `core` | `shared` + Data JPA; Redis/Kafka starters only when those packages exist |
-| `features/user`, `movie`, `theatre` | `core` |
-| `features/auth` | `core` + `user` + Spring Security |
+| `core` | `shared` + Data JPA + Spring Security; Redis/Kafka starters only when those packages exist |
+| `features/identity` | `core` + JJWT |
+| `features/movie`, `theatre` | `core` |
 | `features/show` | `core` + `movie` + `theatre` |
-| `features/booking` | `core` + `user` + `show` + `theatre` |
+| `features/booking` | `core` + `identity` + `show` + `theatre` |
 | `features/payment` | `core` + `booking` |
-| `features/review` | `core` + `user` + `movie` |
+| `features/review` | `core` + `identity` + `movie` |
 | `app` | all features + Flyway, Postgres, Actuator, Boot plugin |
 
 Feature-specific extras (JWT, payment SDK) go on **that feature's POM**. Cross-cutting infrastructure (JPA auditing, Redis, Kafka) belongs on **core**, added when we actually use it.
@@ -79,7 +77,7 @@ org.devbot.bookmymovie.shared/
 ```
 
 - **api** — `/api/v1/app` and `/api/v1/web` prefixes.
-- **exception** — shared exception types and `GlobalExceptionHandler` (`ApiError` JSON). Security-specific advice (`BadCredentialsException`, etc.) lives in `features/auth` as `AuthExceptionHandler`.
+- **exception** — shared exception types and `GlobalExceptionHandler` (`ApiError` JSON). Security-specific advice (`BadCredentialsException`, etc.) lives in `features/identity` as `AuthExceptionHandler`.
 - **response** / **pagination** — wrappers, not feature DTOs (`MovieSummaryResponse` stays in `movie.api`).
 - **validation** — reusable constraints (e.g. `@ValidPassword`).
 
@@ -107,7 +105,7 @@ org.devbot.bookmymovie.core/
 ```
 
 - **persistence** — mapped superclasses and JPA setup every feature entity can extend. Feature `@Entity` classes still live in `features/<name>/data`.
-- **security** — domain `Role` / `Permission` and the role→permission map. Spring Security types (`GrantedAuthority`, `SecurityFilterChain`) stay in `features/auth`.
+- **security** — domain `Role` / `Permission` and the role→permission map. Spring Security starter is on `core`; `SecurityFilterChain` / JWT filters stay in `features/identity`.
 - **cache** — Redis connection/template config used by more than one feature. Seat-lock *logic* stays in `booking`.
 - **messaging** — Kafka producer/consumer factory only if the project uses Kafka. Do not add the starter “just in case”.
 - **config** — clocks, object mappers, shared `@Configuration` that is not HTTP-API.
@@ -162,18 +160,18 @@ That serves `GET /api/v1/app/movies`. Use `@WebApi` the same way for `/api/v1/we
 
 | Kind | Location |
 |------|----------|
-| `@RestController`, HTTP DTOs, `SecurityFilterChain`, filters | feature `api` (`auth.api` for security) |
+| `@RestController`, HTTP DTOs, `SecurityFilterChain`, filters | feature `api` (`identity.api` for security) |
 | `@Service` | feature `domain` |
 | `@Entity`, `JpaRepository` | feature `data` |
 | Generic `ApiResponse`, `PageResponse` | `shared` (when implemented) |
 | `ApiError`, `GlobalExceptionHandler` | `shared` ✓ |
-| Security exception advice (`AuthExceptionHandler`) | `features/auth` ✓ |
+| Security exception advice (`AuthExceptionHandler`) | `features/identity` ✓ |
 | `BaseEntity`, `JpaConfig`, later `RedisConfig` / `KafkaConfig` | `core` |
 | Datasource / Flyway / Actuator | `app` |
 
 ## Rules that must hold
 
-- Do not put Spring Security on `shared` or `core`. Filters and `SecurityFilterChain` live in `features/auth`.
+- Spring Security starter lives on `core`. Filters and `SecurityFilterChain` live in `features/identity`. Do not put Security config on `shared`.
 - Feature Maven dependencies follow the DAG only. No cycles.
 - Do not expose JPA entities from controllers. Use DTOs in `api`.
 - `domain` may use `data` in the same feature. `api` may use `domain` in the same feature.

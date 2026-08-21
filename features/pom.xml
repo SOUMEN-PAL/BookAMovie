@@ -13,8 +13,7 @@
     <description>Feature modules</description>
 
     <modules>
-        <module>user</module>
-        <module>auth</module>
+        <module>identity</module>
         <module>movie</module>
         <module>theatre</module>
         <module>show</module>

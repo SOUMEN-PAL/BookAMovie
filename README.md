@@ -66,14 +66,13 @@ App shell
 └─ app                    Boot plugin, Flyway, Postgres, Actuator
 
 Features
-├─ user                   User
-├─ auth                   Spring Security (depends on user)
+├─ identity               User + Session; SecurityFilterChain + JWT
 ├─ movie
 ├─ theatre                Screen + Seat
 ├─ show                   depends on movie + theatre
-├─ booking                Booking + BookingSeat; depends on user + show + theatre
+├─ booking                Booking + BookingSeat; depends on identity + show + theatre
 ├─ payment                depends on booking
-└─ review                 depends on user + movie
+└─ review                 depends on identity + movie
 
 Foundations
 ├─ shared                 Web MVC, validation, API prefixes, ApiError, GlobalExceptionHandler
@@ -82,16 +81,15 @@ Foundations
 
 Full layout and placement rules: [docs/project-structure.md](docs/project-structure.md).
 
-Feature Maven imports (plus `core` on every feature; `auth` also has Spring Security):
+Feature Maven imports (plus `core` on every feature — `core` includes Spring Security):
 
 | Feature | Imports |
 | --- | --- |
-| `user`, `movie`, `theatre` | `core` only |
-| `auth` | `user` |
+| `identity`, `movie`, `theatre` | `core` only |
 | `show` | `movie`, `theatre` |
-| `booking` | `user`, `show`, `theatre` |
+| `booking` | `identity`, `show`, `theatre` |
 | `payment` | `booking` |
-| `review` | `user`, `movie` |
+| `review` | `identity`, `movie` |
 
 ## Module Map
 
@@ -99,9 +97,8 @@ Feature Maven imports (plus `core` on every feature; `auth` also has Spring Secu
 | --- | --- |
 | `app` | `@SpringBootApplication`, `application.properties`, Flyway, Actuator, Postgres driver |
 | `shared` | Lombok, Validation, Web MVC; `@AppApi` / `@WebApi` / `ApiPaths`; `ApiError`, `GlobalExceptionHandler`, `@ValidPassword` |
-| `core` | Data JPA; `BaseEntity`, `JpaConfig`, Role/Permission; Redis/Kafka config when those exist |
-| `user` | User + Session entities and domain services |
-| `auth` | Security starter; JWT filter, `SecurityFilterChain`; web/app auth APIs; `AuthExceptionHandler` |
+| `core` | Data JPA; Spring Security starter; `BaseEntity`, `JpaConfig`, Role/Permission; Redis/Kafka config when those exist |
+| `identity` | User + Session entities and domain services; JWT filter, `SecurityFilterChain`; web/app auth APIs; `AuthExceptionHandler` |
 | `movie` | Catalog, now-showing, upcoming |
 | `theatre` | Theatres, screens, seats |
 | `show` | Showtimes (`@ManyToOne` Movie / Theatre / Screen) |
@@ -133,7 +130,7 @@ Managed by `spring-boot-starter-parent` **4.1.0** unless noted. Resolved from th
 | Lombok | `1.18.46` | `shared` |
 | Spring Data JPA | Boot `4.1.0` | `core` |
 | Hibernate | `7.4.1.Final` | via Data JPA |
-| Spring Security | Boot `4.1.0` | `features/auth` |
+| Spring Security | Boot `4.1.0` | `core` |
 | Flyway | `12.4.0` | `app` + `flyway-database-postgresql` |
 | PostgreSQL JDBC | `42.7.11` | `app` (`runtime`) |
 | Actuator | Boot `4.1.0` | `app` |

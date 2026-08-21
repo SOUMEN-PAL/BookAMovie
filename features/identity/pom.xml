@@ -8,9 +8,9 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-    <artifactId>bookmymovie-review</artifactId>
-    <name>BookMyMovie Review</name>
-    <description>Review feature</description>
+    <artifactId>bookmymovie-identity</artifactId>
+    <name>BookMyMovie Identity</name>
+    <description>Identity feature: users, sessions and authentication</description>
 
     <dependencies>
         <dependency>
@@ -18,12 +18,18 @@
             <artifactId>bookmymovie-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.devbot</groupId>
-            <artifactId>bookmymovie-identity</artifactId>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.devbot</groupId>
-            <artifactId>bookmymovie-movie</artifactId>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 </project>

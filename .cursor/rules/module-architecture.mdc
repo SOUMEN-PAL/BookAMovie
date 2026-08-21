@@ -9,12 +9,14 @@ Maven layout is documented in `docs/project-structure.md`. Follow it when adding
 
 - `app` — `@SpringBootApplication`, properties, Flyway, Actuator. No feature controllers or entities.
 - `shared` — Lombok, Validation, Web MVC. HTTP envelope and prefixes: `api/` (`AppApi`, `WebApi`, `ApiPaths`), later `exception/` (`GlobalExceptionHandler`, `ResourceNotFoundException`), `response/` (`ApiResponse`, `ErrorResponse`), `pagination/` (`PageResponse`), `validation/`. Do not implement those extra classes until a feature needs them. No feature controllers, entities, Spring Security, Redis, or JPA infrastructure.
-- `core` — depends on `shared`; Data JPA. Infrastructure: `persistence/` (`BaseEntity`, `AuditableEntity`, `JpaConfig`), later `cache/RedisConfig`, `messaging/KafkaConfig` only if we use Kafka, and `config/`. Domain security types live in `security/` (`Role`, `Permission`, `RolePermissions`) — no `GrantedAuthority`, no Spring Security dependency. No controllers or feature entities (`User`, `Movie`, `Show`, `Booking`). Redis/Kafka starters go on `core` when those packages are added — not on a feature.
+- `core` — depends on `shared`; Data JPA + Spring Security starter. Infrastructure: `persistence/` (`BaseEntity`, `AuditableEntity`, `JpaConfig`), later `cache/RedisConfig`, `messaging/KafkaConfig` only if we use Kafka, and `config/`. Domain security types live in `security/` (`Role`, `Permission`, `RolePermissions`). No controllers or feature entities (`User`, `Movie`, `Show`, `Booking`). Redis/Kafka starters go on `core` when those packages are added — not on a feature.
 
-- `features/<name>` — one jar per feature: `user`, `auth`, `movie`, `theatre`, `show`, `booking`, `payment`, `review`.
-- Features **may depend on each other one way** (DAG). No cycles. Typical edges: `auth` → `user`; `show` → `movie` + `theatre`; `booking` → `user` + `show` + `theatre`; `payment` → `booking`; `review` → `user` + `movie`.
-- `app` depends on every feature. Security reaches the process through `features/auth`.
-- Spring Security starter and `SecurityFilterChain` / JWT filters belong in `features/auth`, never in `core` or `shared`.
+- `features/<name>` — one jar per feature: `identity`, `movie`, `theatre`, `show`, `booking`, `payment`, `review`.
+- `identity` holds users, sessions and authentication in one jar under the single package root `org.devbot.bookmymovie.identity`, split by layer like every other feature. User and auth code sit side by side in the same `api`/`domain`/`data` packages — that mutual dependency is why they are one module.
+- Features **may depend on each other one way** (DAG). No cycles. Typical edges: `show` → `movie` + `theatre`; `booking` → `identity` + `show` + `theatre`; `payment` → `booking`; `review` → `identity` + `movie`.
+- `app` depends on every feature. Security reaches the process through `features/identity`.
+- Spring Security starter lives on `core` (available to every feature). `SecurityFilterChain` / JWT filters still belong in `features/identity`, never in `shared`.
+- The authenticated principal is the `User` entity itself, which implements `UserDetails`. It is **detached** — read scalar fields only, never touch `getSessions()` or other lazy associations on a principal, and do not add `@ToString` to `User`.
 - JPA associations are allowed inside a feature jar and toward a Maven dependency (`Show` → `Movie`; `Booking` → `User` / `Show`). Do not map toward a module that must not depend on you.
 - Screen/Seat live in `theatre`. BookingSeat lives in `booking`.
 - Do not add `api`/`domain`/`data` as extra Maven modules unless a feature is large enough to need it (see the docs). Until then those are **packages** inside the feature jar.
